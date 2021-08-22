@@ -157,3 +157,9 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'error',
 }
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+LOGIN_REDIRECT_URL = 'dashboard'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

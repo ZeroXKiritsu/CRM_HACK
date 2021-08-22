@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 from phonenumber_field.modelfields import PhoneNumberField
 
-class Account(models.Model):
+class Profile(models.Model):
     ADDRESSES_TYPES = (
         ('RA', 'Registered address'),
         ('REA', 'Residential address'),
@@ -263,7 +263,8 @@ class Account(models.Model):
         ('open', 'Open'),
         ('close', 'Close')
     )
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    user = models.OneToOneField(User, related_name='profile', on_delete=models.CASCADE, unique=True)
     address_number = PhoneNumberField(null=True)
     address_type = models.CharField(max_length=255, blank=True, null=True, choices=ADDRESSES_TYPES)
     postcode = models.CharField(max_length=64, blank=True, null=True)
@@ -275,13 +276,20 @@ class Account(models.Model):
     customer_type = models.IntegerField(blank=True, null=True)
     is_vip = models.BooleanField(default=False)
     status = models.CharField(choices=ACCOUNT_STATUS, max_length=64, default="open")
-    age = models.PositiveIntegerField()
+    age = models.PositiveIntegerField(blank=True, null=True)
     communication_type = models.IntegerField(blank=True, null=True)
     communication_number = PhoneNumberField(null=True)
     image = models.ImageField(upload_to='users/', null=True, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return '%s %s' % (self.user.first_name, self.user.last_name)
 
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        instance.profile.save()
