@@ -19,8 +19,8 @@ from django.utils import timezone
 from django.conf import settings
 
 def get_image_url(filename):
-    hash_ = int(time.time())
-    return "%s/%s/%s" % ("profile_pics", hash_, filename)
+    time_ = int(time.time())
+    return "%s/%s/%s" % ("profile_pics", time_, filename)
 
 class Company(models.Model):
     name = models.CharField(max_length=100, blank=True, default="")
@@ -199,8 +199,8 @@ class Attachments(models.Model):
         return arrow.get(self.created_on).humanize()
 
 def get_document_path(filename):
-    hash_ = int(time.time())
-    return "%s/%s/%s" % ("docs", hash_, filename)
+    time_ = int(time.time())
+    return "%s/%s/%s" % ("docs", time_, filename)
 
 class Document(models.Model):
     pass

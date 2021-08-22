@@ -1,4 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 from phonenumber_field.modelfields import PhoneNumberField
 
 class Account(models.Model):
@@ -260,7 +263,7 @@ class Account(models.Model):
         ('open', 'Open'),
         ('close', 'Close')
     )
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     address_number = PhoneNumberField(null=True)
     address_type = models.CharField(max_length=255, blank=True, null=True, choices=ADDRESSES_TYPES)
     postcode = models.CharField(max_length=64, blank=True, null=True)
@@ -275,3 +278,10 @@ class Account(models.Model):
     age = models.PositiveIntegerField()
     communication_type = models.IntegerField(blank=True, null=True)
     communication_number = PhoneNumberField(null=True)
+    image = models.ImageField(upload_to='users/', null=True, blank=True)
+
+    def __str__(self):
+        return '%s %s' % (self.user.first_name, self.user.last_name)
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):

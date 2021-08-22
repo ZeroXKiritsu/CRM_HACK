@@ -15,35 +15,20 @@ Including another URLconf
 """
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth import views
 from django.contrib import admin
 from django.urls import path, include
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-from django.conf.urls import url
-from rest_framework import permissions
-from common.views import index
-
-openapi_info = openapi.Info(
-    title='CRM_HACK API',
-    default_version='v1'
-)
-
-schema = get_schema_view(
-    openapi_info,
-    public=True,
-    permission_classes=(permissions.AllowAny,),
-)
-
-
+from django.contrib.auth import views as auth
 
 urlpatterns = [
-    url(r'^swagger(?P<format>\.json|\.yaml)$', schema.without_ui(cache_timeout=0), name='swagger-json'),
-    url(r'^swagger/$', schema.with_ui("swagger", cache_timeout=0),  name="swagger-ui"),
-    url(r'^redoc/$', schema.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-    path('api/', include('common.urls')),
-    path('logout/', views.LogoutView, {'next_page': '/login/'}, name='logout'),
-    path('', index),
+    path('admin/', admin.site.urls),
+    path('login/', auth.LoginView.as_view(template_name='common/login.html'), name='login'),
+    path('logout/', auth.LogoutView.as_view(next_page='home'), name='logout'),
+    path('change-password/', auth.PasswordChangeView.as_view(template_name='common/change-password.html', success_url='/'), name='change-password'),
+    path('reset-password/', auth.PasswordResetView.as_view(template_name='common/reset-password/reset-password.html', subject_template_name='common/reset-password/reset-password-subject.html', email_template_name = 'common/reset-password/reset-password-email.html'), name='reset-password'),
+    path('reset-password/done/', auth.PasswordResetDoneView.as_view(template_name='common/reset-password/reset-password-done.html'), name='reset-password-done'),
+    path('reset-password/confirm/<uidb64>/<token>/', auth.PasswordResetConfirmView.as_view(template_name='common/reset-password/reset-password-confirm.html'), name='reset-password-confirm'),
+    path('reset-password/complete/', auth.PasswordResetCompleteView.as_view(template_name='common/reset-password/reset-password-complete.html'), name='reset-password-complete'),
+    path('oauth/', include('social_django.urls', namespace='social')),
 ]
 
 if settings.DEBUG:
